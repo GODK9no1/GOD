@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ระบบเช็คชื่อออนไลน์</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg,#75dbf0 0%,#a7bfe8 100%);margin:0; min-height:100vh;}
+    .container { max-width:500px; margin: 24px auto 0 auto; background:#fff; border-radius:18px; box-shadow:0 6px 24px #72bada99; padding:28px 12px 18px;}
+    h2 { text-align:center; color:#3474bb; margin-top:0; }
+    .add-row { display:flex; gap:8px; margin-bottom:14px;}
+    .add-row input { flex:1; border-radius:8px; border:1px solid #bcd4dc; padding:9px; font-size:1.01em;}
+    .add-row button { border:none; background:#14cb99; color:#fff; border-radius:8px; padding:8px 15px; font-size:1em; cursor:pointer; transition:background 0.15s;}
+    .add-row button:hover { background: #117a6a;}
+    .date-row {display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:16px;}
+    .date-row select { font-size:1em; border-radius:6px; border:1px solid #aacde7; padding:5px;}
+    table { border-collapse:collapse; width:100%; background:#fff; border-radius:12px; overflow:hidden;}
+    th, td { padding:10px 5px; text-align:center;}
+    th { background:#51b7f9; color:#fff; font-weight:600;}
+    tr:nth-child(even) td { background:#f4fafd;}
+    td.status-radio input[type="radio"] { accent-color: #0db3c6;}
+    .on-time { color:#119600; font-weight: bold;}
+    .late { color:#ff8800; font-weight: bold;}
+    .leave { color: #db8413; font-weight:bold;}
+    .sick { color: #9a57d3; font-weight:bold;}
+    .btn-del { background: #e05c4b; color: #fff; border: none; border-radius: 8px; padding: 4px 11px; font-size:0.98em; cursor:pointer;}
+    .btn-del:hover { background: #b82013;}
+    @media (max-width: 600px) {
+      .container {padding: 13px 3px 9px 3px;}
+      th, td {font-size: 0.97em; padding: 6px 2px;}
+    }
+    .history-block {background:#ecf6fa; border-radius:9px; padding:10px 7px; margin-top:22px;}
+    .history-block h4 {margin:0 0 2px 0; font-size:1.08em;}
+    .credit {font-size:.96em; color:#7fb6db; text-align:center; margin:14px 0 0 0;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ระบบเช็คชื่อออนไลน์</h2>
+    <div class="add-row">
+      <input id="studentName" placeholder="เพิ่มชื่อ..." autofocus autocomplete="off">
+      <button onclick="addStudent()">เพิ่มชื่อ</button>
+    </div>
+    <div class="date-row">
+      <span>ดูข้อมูลวันที่</span>
+      <select id="dateSelect" onchange="changeDay()"></select>
+      <button onclick="setToday()" style="background:#3faee4;">วันนี้</button>
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th>ที่</th>
+          <th>ชื่อ</th>
+          <th>มา</th>
+          <th>มาสาย</th>
+          <th>ลากิจ</th>
+          <th>ลาป่วย</th>
+          <th>เวลา/สถานะ</th>
+          <th>ลบ</th>
+        </tr>
+      </thead>
+      <tbody id="studentTable"></tbody>
+    </table>
+    <div class="history-block">
+      <h4>บันทึกของวันที่เลือก</h4>
+      <pre id="history" style="font-family:'Prompt',monospace;font-size:1.03em; margin:0; background:transparent; border:none;"></pre>
+    </div>
+    <div class="credit">GitHub Copilot Chat Assistant</div>
+  </div>
+  <script>
+    function todayStr() {
+      const now = new Date();
+      return now.toISOString().slice(0,10);
+    }
+    function getNowFull() {
+      const now = new Date();
+      return now.toLocaleString('th-TH', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'});
+    }
+
+    let students = JSON.parse(localStorage.getItem("students") || "[]");
+    let attendance = JSON.parse(localStorage.getItem("attendance_v4") || "{}");
+    let workingDate = todayStr();
+
+    function updateDateSelect() {
+      let dateSelect = document.getElementById("dateSelect");
+      let allDays = Object.keys(attendance);
+      if (allDays.length === 0) allDays.push(todayStr());
+      dateSelect.innerHTML = '';
+      allDays.sort().forEach(d=>{
+        let show = d.split('-').reverse().join('/');
+        dateSelect.innerHTML += `<option value="${d}" ${d===workingDate?'selected':''}>${show}</option>`;
+      });
+    }
+
+    function setToday() {
+      workingDate = todayStr();
+      if(!attendance[workingDate]) attendance[workingDate] = {};
+      updateDateSelect();
+      renderTable();
+      showHistory();
+    }
+
+    function changeDay() {
+      let chosen = document.getElementById("dateSelect").value;
+      workingDate = chosen;
+      renderTable();
+      showHistory();
+    }
+
+    function addStudent() {
+      let n = document.getElementById('studentName').value.trim();
+      if (n && !students.includes(n)) {
+        students.push(n);
+        localStorage.setItem("students", JSON.stringify(students));
+        document.getElementById('studentName').value = "";
+        renderTable();
+        showHistory();
+      }
+    }
+    function deleteStudent(idx) {
+      if(confirm("ลบชื่อจริงหรือไม่?")) {
+        let name = students[idx];
+        students.splice(idx,1);
+        localStorage.setItem("students", JSON.stringify(students));
+        Object.keys(attendance).forEach(date=>{
+          if (attendance[date][name]) delete attendance[date][name];
+        });
+        localStorage.setItem("attendance_v4", JSON.stringify(attendance));
+        renderTable();
+        showHistory();
+      }
+    }
+
+    function renderTable() {
+      updateDateSelect();
+      let at = attendance[workingDate] = attendance[workingDate] || {};
+      let tb = "";
+      students.forEach((name,i)=>{
+        let rec = at[name]||{};
+        tb += `<tr>
+            <td>${i+1}</td>
+            <td>${name}</td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="มา"?"checked":""} onclick="mark('${name}','มา')"></td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="มาสาย"?"checked":""} onclick="mark('${name}','มาสาย')"></td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="ลากิจ"?"checked":""} onclick="mark('${name}','ลากิจ')"></td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="ลาป่วย"?"checked":""} onclick="mark('${name}','ลาป่วย')"></td>
+            <td>${
+              rec.status === "มา"
+                ? `<span class="on-time">มา<br>${rec.time||"-"}</span>`
+                : rec.status === "มาสาย"
+                  ? `<span class="late">มาสาย<br>${rec.time||"-"}</span>`
+                  : rec.status === "ลากิจ"
+                    ? `<span class="leave">ลากิจ<br>${rec.time||"-"}</span>`
+                  : rec.status === "ลาป่วย"
+                    ? `<span class="sick">ลาป่วย<br>${rec.time||"-"}</span>`
+                  : "-"
+            }</td>
+            <td><button class="btn-del" onclick="deleteStudent(${i})">ลบ</button></td>
+          </tr>`;
+      });
+      document.getElementById("studentTable").innerHTML = tb;
+    }
+
+    function mark(name, status) {
+      // ทุกการเช็ค จะอัปเดทเฉพาะวันที่เลือกเท่านั้น
+      let rec = {
+        status: status,
+        time: getNowFull()
+      };
+      attendance[workingDate] = attendance[workingDate] || {};
+      attendance[workingDate][name] = rec;
+      localStorage.setItem("attendance_v4", JSON.stringify(attendance));
+      renderTable();
+      showHistory();
+    }
+
+    function showHistory() {
+      let at = attendance[workingDate] = attendance[workingDate] || {};
+      let out = `วันที่: ${workingDate.split('-').reverse().join('/')} \n`;
+      students.forEach((n,i)=>{
+        let rec = at[n]||{};
+        if(rec.status) {
+          out += `[${i+1}] ${n}: ${rec.status} (${rec.time})\n`;
+        }
+        else out += `[${i+1}] ${n}: ยังไม่เช็ค\n`;
+      });
+      document.getElementById("history").textContent = out;
+    }
+
+    setToday(); // initial setup
+  </script>
+</body>
+</html>
