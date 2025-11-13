@@ -6,78 +6,518 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Prompt', sans-serif; background: linear-gradient(135deg,#75dbf0 0%,#a7bfe8 100%);margin:0; min-height:100vh;}
-    .container { max-width:500px; margin: 24px auto 0 auto; background:#fff; border-radius:18px; box-shadow:0 6px 24px #72bada99; padding:28px 12px 18px;}
-    h2 { text-align:center; color:#3474bb; margin-top:0; }
-    .add-row { display:flex; gap:8px; margin-bottom:14px;}
-    .add-row input { flex:1; border-radius:8px; border:1px solid #bcd4dc; padding:9px; font-size:1.01em;}
-    .add-row button { border:none; background:#14cb99; color:#fff; border-radius:8px; padding:8px 15px; font-size:1em; cursor:pointer; transition:background 0.15s;}
-    .add-row button:hover { background: #117a6a;}
-    .date-row {display:flex; justify-content:flex-end; align-items:center; gap:8px; margin-bottom:16px;}
-    .date-row select { font-size:1em; border-radius:6px; border:1px solid #aacde7; padding:5px;}
-    table { border-collapse:collapse; width:100%; background:#fff; border-radius:12px; overflow:hidden;}
-    th, td { padding:10px 5px; text-align:center;}
-    th { background:#51b7f9; color:#fff; font-weight:600;}
-    tr:nth-child(even) td { background:#f4fafd;}
-    td.status-radio input[type="radio"] { accent-color: #0db3c6;}
-    .on-time { color:#119600; font-weight: bold;}
-    .late { color:#ff8800; font-weight: bold;}
-    .leave { color: #db8413; font-weight:bold;}
-    .sick { color: #9a57d3; font-weight:bold;}
-    .btn-del { background: #e05c4b; color: #fff; border: none; border-radius: 8px; padding: 4px 11px; font-size:0.98em; cursor:pointer;}
-    .btn-del:hover { background: #b82013;}
-    @media (max-width: 600px) {
-      .container {padding: 13px 3px 9px 3px;}
-      th, td {font-size: 0.97em; padding: 6px 2px;}
+    * { box-sizing: border-box; }
+    body { 
+      font-family: 'Prompt', sans-serif; 
+      background: linear-gradient(135deg, #75dbf0 0%, #a7bfe8 100%);
+      margin: 0; 
+      min-height: 100vh;
+      padding-bottom: 20px;
     }
-    .history-block {background:#ecf6fa; border-radius:9px; padding:10px 7px; margin-top:22px;}
-    .history-block h4 {margin:0 0 2px 0; font-size:1.08em;}
-    .credit {font-size:.96em; color:#7fb6db; text-align:center; margin:14px 0 0 0;}
+    .container { 
+      max-width: 900px; 
+      margin: 20px auto; 
+      background: #fff; 
+      border-radius: 18px; 
+      box-shadow: 0 6px 24px #72bada99; 
+      padding: 28px;
+    }
+    h2 { 
+      text-align: center; 
+      color: #3474bb; 
+      margin: 0 0 20px 0;
+      font-size: 1.8em;
+    }
+    .header-section {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .stats-box {
+      background: linear-gradient(135deg, #51b7f9 0%, #3faee4 100%);
+      color: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      display: flex;
+      gap: 30px;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(51, 183, 249, 0.3);
+    }
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .stat-number {
+      font-size: 1.8em;
+      font-weight: bold;
+    }
+    .stat-label {
+      font-size: 0.9em;
+      opacity: 0.9;
+    }
+    .add-row { 
+      display: flex; 
+      gap: 8px; 
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .add-row input { 
+      flex: 1; 
+      min-width: 150px;
+      border-radius: 8px; 
+      border: 1px solid #bcd4dc; 
+      padding: 10px; 
+      font-size: 1em;
+    }
+    .add-row button { 
+      border: none; 
+      background: #14cb99; 
+      color: #fff; 
+      border-radius: 8px; 
+      padding: 10px 20px; 
+      font-size: 1em; 
+      cursor: pointer; 
+      transition: all 0.15s;
+      font-weight: 600;
+    }
+    .add-row button:hover { 
+      background: #117a6a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(20, 203, 153, 0.3);
+    }
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+    .action-buttons button {
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.15s;
+      color: white;
+    }
+    .btn-export {
+      background: #3faee4;
+    }
+    .btn-export:hover {
+      background: #2a8cb3;
+      transform: translateY(-2px);
+    }
+    .btn-import {
+      background: #9a57d3;
+    }
+    .btn-import:hover {
+      background: #7a3fa3;
+      transform: translateY(-2px);
+    }
+    .btn-backup {
+      background: #ff8800;
+    }
+    .btn-backup:hover {
+      background: #cc6600;
+      transform: translateY(-2px);
+    }
+    .btn-reset {
+      background: #e05c4b;
+    }
+    .btn-reset:hover {
+      background: #b82013;
+      transform: translateY(-2px);
+    }
+    .date-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .date-controls {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .date-row select { 
+      font-size: 1em; 
+      border-radius: 6px; 
+      border: 1px solid #aacde7; 
+      padding: 8px;
+      min-width: 140px;
+    }
+    .search-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .search-box input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid #bcd4dc;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+    .table-wrapper {
+      overflow-x: auto;
+      margin-bottom: 20px;
+    }
+    table { 
+      border-collapse: collapse; 
+      width: 100%; 
+      background: #fff; 
+      border-radius: 12px; 
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    th, td { 
+      padding: 12px 8px; 
+      text-align: center;
+      border-bottom: 1px solid #e0e8f0;
+    }
+    th { 
+      background: #51b7f9; 
+      color: #fff; 
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+    }
+    tr:nth-child(even) td { 
+      background: #f4fafd;
+    }
+    tr:hover td {
+      background-color: #e8f4fb !important;
+    }
+    td.status-radio input[type="radio"] { 
+      accent-color: #0db3c6;
+      cursor: pointer;
+      width: 18px;
+      height: 18px;
+    }
+    .on-time { 
+      color: #119600; 
+      font-weight: bold;
+    }
+    .late { 
+      color: #ff8800; 
+      font-weight: bold;
+    }
+    .leave { 
+      color: #db8413; 
+      font-weight: bold;
+    }
+    .sick { 
+      color: #9a57d3; 
+      font-weight: bold;
+    }
+    .not-checked {
+      color: #999;
+      font-weight: 500;
+    }
+    .btn-del { 
+      background: #e05c4b; 
+      color: #fff; 
+      border: none; 
+      border-radius: 8px; 
+      padding: 6px 12px; 
+      font-size: 0.95em; 
+      cursor: pointer;
+      transition: all 0.15s;
+      font-weight: 600;
+    }
+    .btn-del:hover { 
+      background: #b82013;
+      transform: scale(1.05);
+    }
+    .history-block {
+      background: linear-gradient(135deg, #ecf6fa 0%, #e0f0f7 100%);
+      border-radius: 12px; 
+      padding: 15px; 
+      margin-top: 20px;
+      border: 1px solid #c5e3f0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+    .history-block h4 {
+      margin: 0 0 10px 0; 
+      font-size: 1.1em;
+      color: #3474bb;
+    }
+    #history {
+      font-family: 'Courier New', monospace;
+      font-size: 0.95em; 
+      margin: 0; 
+      background: white; 
+      border: 1px solid #d0e8f2;
+      border-radius: 6px;
+      padding: 12px;
+      line-height: 1.6;
+      max-height: 300px;
+      overflow-y: auto;
+      color: #333;
+    }
+    .alert {
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      font-weight: 500;
+      display: none;
+    }
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    .alert-warning {
+      background: #fff3cd;
+      color: #856404;
+      border: 1px solid #ffeaa7;
+    }
+    .alert.show {
+      display: block;
+    }
+    .credit {
+      font-size: 0.9em; 
+      color: #7fb6db; 
+      text-align: center; 
+      margin: 20px 0 0 0;
+      padding-top: 15px;
+      border-top: 1px solid #e0e8f0;
+    }
+    input[type="file"] {
+      display: none;
+    }
+    .hidden-file-input {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .container {
+        padding: 15px;
+        margin: 10px;
+      }
+      h2 {
+        font-size: 1.4em;
+      }
+      .stats-box {
+        gap: 20px;
+      }
+      .stat-number {
+        font-size: 1.4em;
+      }
+      .header-section {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      th, td {
+        font-size: 0.9em; 
+        padding: 8px 4px;
+      }
+      .action-buttons {
+        justify-content: center;
+      }
+      .action-buttons button {
+        flex: 1;
+        min-width: 80px;
+      }
+      .date-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .date-controls {
+        flex-direction: column;
+      }
+      .date-controls select {
+        width: 100%;
+      }
+      .search-box {
+        width: 100%;
+      }
+      .add-row button {
+        padding: 10px;
+        flex: 1;
+      }
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 0;
+    }
+    .modal.show {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: #fff;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+    }
+    .modal-content h3 {
+      margin: 0 0 15px 0;
+      color: #3474bb;
+    }
+    .modal-content button {
+      margin: 10px 5px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.95em;
+    }
+    .modal-content .btn-confirm {
+      background: #14cb99;
+      color: white;
+    }
+    .modal-content .btn-cancel {
+      background: #bbb;
+      color: white;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>ระบบเช็คชื่อออนไลน์</h2>
+    <h2>📋 ระบบเช็คชื่อออนไลน์</h2>
+    
+    <div id="alertBox" class="alert"></div>
+
+    <div class="header-section">
+      <div class="stats-box">
+        <div class="stat-item">
+          <div class="stat-number" id="totalStudents">0</div>
+          <div class="stat-label">จำนวนนักเรียน</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="totalPresent">0</div>
+          <div class="stat-label">มาเรียน</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="presentPercentage">0%</div>
+          <div class="stat-label">เปอร์เซ็นต์</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number" id="totalAbsent">0</div>
+          <div class="stat-label">ขาด/ลา</div>
+        </div>
+      </div>
+    </div>
+
     <div class="add-row">
-      <input id="studentName" placeholder="เพิ่มชื่อ..." autofocus autocomplete="off">
-      <button onclick="addStudent()">เพิ่มชื่อ</button>
+      <input id="studentName" placeholder="เพิ่มชื่อนักเรียน..." autofocus autocomplete="off">
+      <button onclick="addStudent()">➕ เพิ่มชื่อ</button>
     </div>
+
+    <div class="action-buttons">
+      <button class="btn-export" onclick="exportToCSV()">📥 ส่งออก CSV</button>
+      <button class="btn-import" onclick="triggerFileInput()">📤 นำเข้า CSV</button>
+      <button class="btn-backup" onclick="backupData()">💾 สำรองข้อมูล</button>
+      <button class="btn-reset" onclick="confirmReset()">🔄 ล้างข้อมูล</button>
+    </div>
+
+    <input type="file" id="fileInput" accept=".csv" onchange="importFromCSV(event)" class="hidden-file-input">
+
     <div class="date-row">
-      <span>ดูข้อมูลวันที่</span>
-      <select id="dateSelect" onchange="changeDay()"></select>
-      <button onclick="setToday()" style="background:#3faee4;">วันนี้</button>
+      <div class="date-controls">
+        <label for="dateSelect">📅 ดูข้อมูลวันที่:</label>
+        <select id="dateSelect" onchange="changeDay()"></select>
+        <button onclick="setToday()" style="background: #3faee4; color: white; border: none; border-radius: 8px; padding: 8px 16px; cursor: pointer; font-weight: 600;">📌 วันนี้</button>
+      </div>
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="🔍 ค้นหาชื่อ..." onkeyup="searchStudents()">
+      </div>
     </div>
-    <table>
-      <thead>
-        <tr>
-          <th>ที่</th>
-          <th>ชื่อ</th>
-          <th>มา</th>
-          <th>มาสาย</th>
-          <th>ลากิจ</th>
-          <th>ลาป่วย</th>
-          <th>เวลา/สถานะ</th>
-          <th>ลบ</th>
-        </tr>
-      </thead>
-      <tbody id="studentTable"></tbody>
-    </table>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>ที่</th>
+            <th>ชื่อ</th>
+            <th title="มาเรียน">✅ มา</th>
+            <th title="มาสาย">⏰ มาสาย</th>
+            <th title="ลากิจ">📝 ลากิจ</th>
+            <th title="ลาป่วย">🏥 ลาป่วย</th>
+            <th>เวลา/สถานะ</th>
+            <th>ลบ</th>
+          </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+      </table>
+    </div>
+
     <div class="history-block">
-      <h4>บันทึกของวันที่เลือก</h4>
-      <pre id="history" style="font-family:'Prompt',monospace;font-size:1.03em; margin:0; background:transparent; border:none;"></pre>
+      <h4>📊 บันทึกของวันที่เลือก</h4>
+      <pre id="history"></pre>
     </div>
-    <div class="credit">GitHub Copilot Chat Assistant</div>
+
+    <div class="credit">GitHub Copilot Chat Assistant | เวอร์ชัน 2.0</div>
   </div>
+
+  <!-- Confirmation Modal -->
+  <div id="confirmModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle">ยืนยันการลบ</h3>
+      <p id="modalMessage">คุณแน่ใจหรือไม่?</p>
+      <button class="btn-confirm" onclick="confirmAction()">ยืนยัน</button>
+      <button class="btn-cancel" onclick="closeModal()">ยกเลิก</button>
+    </div>
+  </div>
+
   <script>
+    // ตัวแปรสำหรับเก็บการดำเนินการปัจจุบัน
+    let pendingAction = null;
+
     function todayStr() {
       const now = new Date();
-      return now.toISOString().slice(0,10);
-    }
-    function getNowFull() {
-      const now = new Date();
-      return now.toLocaleString('th-TH', {year:'numeric', month:'2-digit', day:'2-digit', hour:'2-digit', minute:'2-digit', second:'2-digit'});
+      return now.toISOString().slice(0, 10);
     }
 
+    function getNowFull() {
+      const now = new Date();
+      return now.toLocaleString('th-TH', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      });
+    }
+
+    function showAlert(message, type = 'success') {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.textContent = message;
+      alertBox.className = `alert alert-${type} show`;
+      setTimeout(() => {
+        alertBox.classList.remove('show');
+      }, 3000);
+    }
+
+    // โหลดข้อมูลจาก localStorage
     let students = JSON.parse(localStorage.getItem("students") || "[]");
     let attendance = JSON.parse(localStorage.getItem("attendance_v4") || "{}");
     let workingDate = todayStr();
@@ -87,15 +527,15 @@
       let allDays = Object.keys(attendance);
       if (allDays.length === 0) allDays.push(todayStr());
       dateSelect.innerHTML = '';
-      allDays.sort().forEach(d=>{
+      allDays.sort().reverse().forEach(d => {
         let show = d.split('-').reverse().join('/');
-        dateSelect.innerHTML += `<option value="${d}" ${d===workingDate?'selected':''}>${show}</option>`;
+        dateSelect.innerHTML += `<option value="${d}" ${d === workingDate ? 'selected' : ''}>${show}</option>`;
       });
     }
 
     function setToday() {
       workingDate = todayStr();
-      if(!attendance[workingDate]) attendance[workingDate] = {};
+      if (!attendance[workingDate]) attendance[workingDate] = {};
       updateDateSelect();
       renderTable();
       showHistory();
@@ -110,60 +550,99 @@
 
     function addStudent() {
       let n = document.getElementById('studentName').value.trim();
-      if (n && !students.includes(n)) {
-        students.push(n);
-        localStorage.setItem("students", JSON.stringify(students));
-        document.getElementById('studentName').value = "";
-        renderTable();
-        showHistory();
+      if (!n) {
+        showAlert('⚠️ กรุณากรอกชื่อนักเรียน', 'warning');
+        return;
       }
+      if (students.includes(n)) {
+        showAlert('⚠️ ชื่อนี้มีอยู่แล้ว', 'warning');
+        return;
+      }
+      students.push(n);
+      students.sort();
+      localStorage.setItem("students", JSON.stringify(students));
+      document.getElementById('studentName').value = "";
+      renderTable();
+      showHistory();
+      showAlert('✅ เพิ่มนักเรียนสำเร็จ', 'success');
     }
+
     function deleteStudent(idx) {
-      if(confirm("ลบชื่อจริงหรือไม่?")) {
+      pendingAction = () => {
         let name = students[idx];
-        students.splice(idx,1);
+        students.splice(idx, 1);
         localStorage.setItem("students", JSON.stringify(students));
-        Object.keys(attendance).forEach(date=>{
+        Object.keys(attendance).forEach(date => {
           if (attendance[date][name]) delete attendance[date][name];
         });
         localStorage.setItem("attendance_v4", JSON.stringify(attendance));
         renderTable();
         showHistory();
-      }
+        showAlert(`✅ ลบ "${name}" สำเร็จ`, 'success');
+      };
+      showConfirmModal(`ลบนักเรียน "${students[idx]}"`, `คุณแน่ใจว่าต้องการลบ "${students[idx]}" หรือไม่?`);
+    }
+
+    function searchStudents() {
+      let searchValue = document.getElementById('searchInput').value.toLowerCase();
+      let rows = document.querySelectorAll('#studentTable tr');
+      rows.forEach(row => {
+        let studentName = row.cells[1]?.textContent.toLowerCase() || '';
+        row.style.display = studentName.includes(searchValue) ? '' : 'none';
+      });
+    }
+
+    function updateStatistics() {
+      let at = attendance[workingDate] || {};
+      let present = 0;
+      students.forEach(name => {
+        if (at[name] && (at[name].status === "มา" || at[name].status === "มาสาย")) {
+          present++;
+        }
+      });
+      let total = students.length;
+      let percentage = total > 0 ? Math.round((present / total) * 100) : 0;
+      let absent = total - present;
+
+      document.getElementById('totalStudents').textContent = total;
+      document.getElementById('totalPresent').textContent = present;
+      document.getElementById('presentPercentage').textContent = percentage + '%';
+      document.getElementById('totalAbsent').textContent = absent;
     }
 
     function renderTable() {
       updateDateSelect();
       let at = attendance[workingDate] = attendance[workingDate] || {};
       let tb = "";
-      students.forEach((name,i)=>{
-        let rec = at[name]||{};
+      let visibleIndex = 1;
+      students.forEach((name, i) => {
+        let rec = at[name] || {};
         tb += `<tr>
-            <td>${i+1}</td>
-            <td>${name}</td>
-            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="มา"?"checked":""} onclick="mark('${name}','มา')"></td>
-            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="มาสาย"?"checked":""} onclick="mark('${name}','มาสาย')"></td>
-            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="ลากิจ"?"checked":""} onclick="mark('${name}','ลากิจ')"></td>
-            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status==="ลาป่วย"?"checked":""} onclick="mark('${name}','ลาป่วย')"></td>
+            <td>${visibleIndex++}</td>
+            <td style="text-align: left; padding-left: 15px;">${name}</td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status === "มา" ? "checked" : ""} onclick="mark('${name}','มา')"></td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status === "มาสาย" ? "checked" : ""} onclick="mark('${name}','มาสาย')"></td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status === "ลากิจ" ? "checked" : ""} onclick="mark('${name}','ลากิจ')"></td>
+            <td class="status-radio"><input name="st${i}" type="radio" ${rec.status === "ลาป่วย" ? "checked" : ""} onclick="mark('${name}','ลาป่วย')"></td>
             <td>${
               rec.status === "มา"
-                ? `<span class="on-time">มา<br>${rec.time||"-"}</span>`
+                ? `<span class="on-time">✅ มา<br><small>${rec.time || "-"}</small></span>`
                 : rec.status === "มาสาย"
-                  ? `<span class="late">มาสาย<br>${rec.time||"-"}</span>`
+                  ? `<span class="late">⏰ มาสาย<br><small>${rec.time || "-"}</small></span>`
                   : rec.status === "ลากิจ"
-                    ? `<span class="leave">ลากิจ<br>${rec.time||"-"}</span>`
-                  : rec.status === "ลาป่วย"
-                    ? `<span class="sick">ลาป่วย<br>${rec.time||"-"}</span>`
-                  : "-"
+                    ? `<span class="leave">📝 ลากิจ<br><small>${rec.time || "-"}</small></span>`
+                    : rec.status === "ลาป่วย"
+                      ? `<span class="sick">🏥 ลาป่วย<br><small>${rec.time || "-"}</small></span>`
+                      : `<span class="not-checked">❌ ยังไม่เช็ค</span>`
             }</td>
             <td><button class="btn-del" onclick="deleteStudent(${i})">ลบ</button></td>
           </tr>`;
       });
       document.getElementById("studentTable").innerHTML = tb;
+      updateStatistics();
     }
 
     function mark(name, status) {
-      // ทุกการเช็ค จะอัปเดทเฉพาะวันที่เลือกเท่านั้น
       let rec = {
         status: status,
         time: getNowFull()
@@ -173,22 +652,59 @@
       localStorage.setItem("attendance_v4", JSON.stringify(attendance));
       renderTable();
       showHistory();
+      showAlert(`✅ บันทึก "${name}" - ${status}`, 'success');
     }
 
     function showHistory() {
       let at = attendance[workingDate] = attendance[workingDate] || {};
       let out = `วันที่: ${workingDate.split('-').reverse().join('/')} \n`;
-      students.forEach((n,i)=>{
-        let rec = at[n]||{};
-        if(rec.status) {
-          out += `[${i+1}] ${n}: ${rec.status} (${rec.time})\n`;
+      out += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+      students.forEach((n, i) => {
+        let rec = at[n] || {};
+        if (rec.status) {
+          out += `[${String(i + 1).padStart(2, '0')}] ${n.padEnd(20)} : ${rec.status} (${rec.time})\n`;
+        } else {
+          out += `[${String(i + 1).padStart(2, '0')}] ${n.padEnd(20)} : ยังไม่เช็ค\n`;
         }
-        else out += `[${i+1}] ${n}: ยังไม่เช็ค\n`;
       });
+      out += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`;
       document.getElementById("history").textContent = out;
     }
 
-    setToday(); // initial setup
-  </script>
-</body>
-</html>
+    function exportToCSV() {
+      let at = attendance[workingDate] || {};
+      let csv = "ที่,ชื่อ,สถานะ,เวลา\n";
+      students.forEach((name, i) => {
+        let rec = at[name] || {};
+        let status = rec.status || "ยังไม่เช็ค";
+        let time = rec.time || "-";
+        csv += `${i + 1},"${name}","${status}","${time}"\n`;
+      });
+
+      let link = document.createElement('a');
+      link.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+      link.download = `attendance_${workingDate}.csv`;
+      link.click();
+      showAlert('✅ ส่งออก CSV สำเร็จ', 'success');
+    }
+
+    function triggerFileInput() {
+      document.getElementById('fileInput').click();
+    }
+
+    function importFromCSV(event) {
+      let file = event.target.files[0];
+      if (!file) return;
+
+      let reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          let csv = e.target.result;
+          let lines = csv.split('\n');
+          let imported = 0;
+
+          for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+            let cols = lines[i].split(',');
+            if (cols.length < 2) continue;
+            let name = cols[1].replace(/"
